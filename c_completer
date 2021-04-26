@@ -1,0 +1,21 @@
+#!/bin/sh
+
+get_functions() {
+	grep -E -o '(const |void |int |unsigned |short |long |double |float |char |struct )+ *\w+ *\([^)]*\)' | sed 's/ *(/(/g' | sed -E 's/^(void |int |unsigned |short |long |double |float |char |struct )+/&|/g' | sed 's/ *| */|/g'
+}
+
+get_variables() {
+	grep -E -o '(const |void |int |unsigned |short |long |double |float |char |struct )+ *\w+ *[;=]' | tr -d '=;' | sed 's/ *$//g' | sed -E 's/^(void |int |unsigned |short |long |double |float |char |struct )+/&|/g' | sed 's/ *| */|/g'
+}
+
+get_definitions() {
+	gcc -dM -E -
+}
+
+get_all_includes() {
+	gcc -P -E $1
+}
+
+[ "$1" = "fun" ] && get_all_includes $2 | get_functions
+[ "$1" = "var" ] && get_all_includes $2 | get_variables
+[ "$1" = "def" ] && get_all_includes $2 | get_definitions
