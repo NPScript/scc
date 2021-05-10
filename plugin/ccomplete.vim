@@ -2,7 +2,6 @@ let s:c_completer_executable = expand('<sfile>')
 let s:c_completer_executable = strpart(s:c_completer_executable, 0, strridx(s:c_completer_executable, "/"))
 let s:c_completer_executable = strpart(s:c_completer_executable, 0, strridx(s:c_completer_executable, "/"))
 let s:c_completer_executable = s:c_completer_executable . "/c_completer"
-echo s:c_completer_executable
 
 function! GetFunComplete(base)
 		let functions=split(system(s:c_completer_executable . " fun " . expand("%") . " 2>/dev/null | grep '" . a:base . "'"), '\n')
