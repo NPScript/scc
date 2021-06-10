@@ -4,7 +4,7 @@ let s:c_completer_executable = strpart(s:c_completer_executable, 0, strridx(s:c_
 let s:c_completer_executable = s:c_completer_executable . "/c_completer"
 
 function! GetFunComplete(base)
-		let functions=split(system(s:c_completer_executable . " fun " . expand("%") . " 2>/dev/null | grep '" . a:base . "'"), '\n')
+		let functions=split(system("printf '" . join(getline(0, line('$')), '\n') . "' | " . s:c_completer_executable . " fun 2>/dev/null | grep '" . a:base . "'"), '\n')
 		let items = []
 		for f in functions
 			let fs = split(f, "\|")
@@ -17,12 +17,12 @@ function! GetFunComplete(base)
 endfunction
 
 function! GetVarComplete(base)
-		let functions=split(system(s:c_completer_executable . " var " . expand("%") . " 2>/dev/null | grep '" . a:base . "'"), '\n')
+		let functions=split(system("printf '" . join(getline(0, line('$')), '\n') . "' | " . s:c_completer_executable . " var 2>/dev/null | grep '" . a:base . "'"), '\n')
 		let items = []
 		for f in functions
 			let fs = split(f, "\|")
-			let name = fs[1]
-			let rettype = fs[0]
+			let name = fs[0]
+			let rettype = fs[1]
 			call add(items, {"word" : name, "menu" : ": " . rettype, "kind": "v"})
 		endfor
 
@@ -30,13 +30,16 @@ function! GetVarComplete(base)
 endfunction
 
 function! GetDefComplete(base)
-		let functions=split(system(s:c_completer_executable . " def " . expand("%") . " 2>/dev/null | grep '" . a:base . "'"), '\n')
+		let functions=split(system("printf '" . join(getline(0, line('$')), '\n') . "' | " . s:c_completer_executable . " def 2>/dev/null | grep '" . a:base . "'"), '\n')
 		let items = []
 		for f in functions
-			let fs = split(f)
-			let name = join(fs[1:], " ")
-			let rettype = fs[0]
-			call add(items, {"word" : name, "kind": "d"})
+			let fs = split(f, "\|")
+			let name = fs[0]
+			let rettype = ""
+			if (len(fs) > 1)
+				let rettype = fs[1]
+			endif
+			call add(items, {"word" : name, "menu" : ": " . rettype, "kind": "d"})
 		endfor
 
 		return items
@@ -90,3 +93,13 @@ autocmd FileType c inoremap <silent><expr> <s-tab> pumvisible() ? "\<C-P>" : "\<
 autocmd FileType c inoremap <silent> <C-S> <C-X><C-U>
 
 autocmd FileType c setlocal completefunc=Ccomplete
+
+autocmd FileType cpp command! CSelNextArg call CSelectNextArgument()
+autocmd FileType cpp nnoremap <tab> :CSelNextArg<CR>
+autocmd FileType cpp vnoremap <tab> <esc>:CSelNextArg<CR>
+autocmd FileType cpp inoremap <silent><expr> <return> pumvisible() ? "\<C-Y>\<esc>0:CSelNextArg\<CR>" : "\<return>"
+autocmd FileType cpp inoremap <silent><expr> <tab> pumvisible() ? "\<C-N>" : "\<tab>"
+autocmd FileType cpp inoremap <silent><expr> <s-tab> pumvisible() ? "\<C-P>" : "\<s-tab>"
+autocmd FileType cpp inoremap <silent> <C-S> <C-X><C-U>
+
+autocmd FileType cpp setlocal completefunc=Ccomplete

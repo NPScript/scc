@@ -9,11 +9,11 @@ get_variables() {
 }
 
 get_definitions() {
-	gcc -dM -E -
+	gcc -dM -E - | awk '{ print $2, "|",$3 }' | tr -d ' '
 }
 
 get_all_includes() {
-	gcc -P -E $1
+	gcc -P -E -
 }
 
 [ "$1" = "fun" ] && get_all_includes $2 | get_functions
