@@ -80,7 +80,7 @@ function! CSelectNextArgument()
 	endif
 
 	if distance > 0
-		execute "normal! hv" . distance . "ho"
+		execute "normal! hv" . distance . "ho\<C-g>"
 	endif
 endfunction
 
